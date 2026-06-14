@@ -133,10 +133,17 @@ RULES:
       const { language } = body
       const text = await callGroq([{
         role: 'user',
-        content: `Generate 10 multiple choice questions for ${language} programming assessment.
+       content: `Generate 10 multiple choice questions for ${language} programming assessment.
 Mix topics: Arrays, Strings, Loops, Functions, OOP, Recursion, Sorting, Searching, Linked Lists, Trees
+Include 3 beginner, 4 intermediate, 3 advanced questions.
+
+STRICT RULES:
+- Each question must have EXACTLY 4 options only
+- Options must be the actual answer text, NOT letters like A, B, C, D
+- correct must be 0, 1, 2, or 3 (index of correct option)
+
 Return ONLY a JSON array:
-[{"topic":"Arrays","level":"beginner","question":"question","options":["A","B","C","D"],"correct":0}]
+[{"topic":"Arrays","level":"beginner","question":"What is the index of first element?","options":["0","1","-1","Depends"],"correct":0}]
 Use only double quotes. No extra text outside JSON.`
       }], 2000)
       return res.json(parseJSON(text))
