@@ -15,10 +15,18 @@ export default function Navbar() {
   return (
     <nav className="border-b border-gray-800 px-6 py-4 flex items-center gap-8">
       <div className="flex items-center gap-2">
-  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-    <Code2 size={18} className="text-white" />
-  </div>
-  <span className="font-bold text-lg text-white">Code<span className="text-purple-400">Gen</span></span>
+  <svg width="40" height="40" viewBox="0 0 40 40">
+    <polygon 
+      points="20,2 36,11 36,29 20,38 4,29 4,11" 
+      fill="#3b0764"
+      stroke="#7c3aed"
+      strokeWidth="1.5"
+    />
+    <text x="50%" y="54%" dominantBaseline="middle" textAnchor="middle" fill="white" fontSize="11" fontWeight="900" fontFamily="Arial">
+      C<tspan fill="#facc15">⚡</tspan>G
+    </text>
+  </svg>
+  <span className="font-bold text-xl text-white">Code<span className="text-purple-400">Gen</span></span>
 </div>
       <div className="flex gap-6">
         {links.map(link => (
