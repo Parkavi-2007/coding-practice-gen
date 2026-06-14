@@ -14,7 +14,12 @@ export default function Navbar() {
 
   return (
     <nav className="border-b border-gray-800 px-6 py-4 flex items-center gap-8">
-      <span className="font-bold text-lg text-purple-400">CodeGen</span>
+      <div className="flex items-center gap-2">
+  <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+    <Code2 size={18} className="text-white" />
+  </div>
+  <span className="font-bold text-lg text-white">Code<span className="text-purple-400">Gen</span></span>
+</div>
       <div className="flex gap-6">
         {links.map(link => (
           <Link
