@@ -9,7 +9,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': 'http://localhost:3001'
+      '/api': 'https://coding-practice-gen-production.up.railway.app'
     }
   }
 })
