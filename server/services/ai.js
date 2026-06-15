@@ -130,27 +130,33 @@ RULES:
 async function generateAssessmentQuestions(language) {
   const text = await callGroq([{
     role: 'user',
-    content: `Generate 10 multiple choice questions for ${language} programming assessment.
+    content: `Generate EXACTLY 10 multiple choice questions for ${language} programming assessment.
 
 Mix topics: Arrays, Strings, Loops, Functions, OOP, Recursion, Sorting, Searching, Linked Lists, Trees
 Include 3 beginner, 4 intermediate, 3 advanced questions.
 
-Return ONLY a JSON array:
+IMPORTANT RULES:
+- Generate EXACTLY 10 questions, no more, no less
+- If the question asks about code output, you MUST include the actual code snippet inside the question text
+- Never say "what is the output of the following code" without showing the code
+- Keep questions clear and self-contained
+- Use only double quotes in JSON
+- No extra text outside the JSON array
+
+Return ONLY a JSON array of exactly 10 objects:
 [
   {
     "topic": "Arrays",
     "level": "beginner",
-    "question": "question text",
-    "options": ["A", "B", "C", "D"],
+    "question": "What will this code print?\\n\\nfor i in range(3):\\n    print(i)",
+    "options": ["0 1 2", "1 2 3", "0 1 2 3", "Error"],
     "correct": 0
   }
-]
-
-Use only double quotes. No extra text outside the JSON array.`
-  }], 2000)
-  return parseJSON(text)
+]`
+  }], 2500)
+  const questions = parseJSON(text)
+  return questions.slice(0, 10)
 }
-
 async function generateStory(problemTitle, problemDescription, language) {
   const text = await callGroq([{
     role: 'user',

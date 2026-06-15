@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle, XCircle, ChevronRight, Brain, Code2, Target, User, Zap, BookOpen, Loader2 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { supabase } from '../utils/supabase'
 
 const LANGUAGES = ['Python', 'JavaScript', 'Java', 'C++', 'TypeScript', 'C', 'C#', 'Go', 'Rust', 'Kotlin']
 
@@ -22,6 +24,7 @@ const ALL_TOPICS = ['Arrays', 'Strings', 'Loops', 'Functions', 'OOP', 'Recursion
 
 export default function AssessmentPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [step, setStep] = useState('language')
   const [language, setLanguage] = useState('')
   const [background, setBackground] = useState('')
@@ -87,6 +90,15 @@ export default function AssessmentPage() {
       localStorage.setItem('codegen_language', language)
       localStorage.setItem('codegen_background', background)
       localStorage.setItem('codegen_goal', goal)
+
+      if (user) {
+        supabase.from('profiles').update({
+          level: assignedLevel,
+          language,
+          background,
+          goal
+        }).eq('id', user.id)
+      }
     }
   }
 
@@ -108,6 +120,14 @@ export default function AssessmentPage() {
       const weak = getWeakTopics(topicStats)
       localStorage.setItem('codegen_focus', 'weakness')
       localStorage.setItem('codegen_weak_topics', JSON.stringify(weak))
+
+      if (user) {
+        supabase.from('profiles').update({
+          focus_mode: 'weakness',
+          weak_topics: weak
+        }).eq('id', user.id)
+      }
+
       navigate('/')
     }
   }
@@ -115,6 +135,14 @@ export default function AssessmentPage() {
   function handleTopicSelect() {
     localStorage.setItem('codegen_focus', 'topic')
     localStorage.setItem('codegen_selected_topic', selectedTopic)
+
+    if (user) {
+      supabase.from('profiles').update({
+        focus_mode: 'topic',
+        selected_topic: selectedTopic
+      }).eq('id', user.id)
+    }
+
     navigate('/')
   }
 

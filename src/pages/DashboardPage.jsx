@@ -1,30 +1,34 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flame, Trophy, Code2, Target, TrendingUp, Clock, Star, RefreshCw } from 'lucide-react'
+import { Flame, Trophy, Code2, Target, TrendingUp, Clock, Star, User } from 'lucide-react'
 import { getProgress } from '../utils/storage'
+import { useAuth } from '../context/AuthContext'
+import { supabase } from '../utils/supabase'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [progress, setProgress] = useState(null)
+  const [profile, setProfile] = useState(null)
 
   useEffect(() => {
     setProgress(getProgress())
-  }, [])
+    if (user) {
+      supabase.from('profiles').select('*').eq('id', user.id).single()
+        .then(({ data }) => setProfile(data))
+    }
+  }, [user])
 
   if (!progress) return (
-    <div className="flex items-center justify-center h-96 text-gray-400">
-      Loading...
-    </div>
+    <div className="flex items-center justify-center h-96 text-gray-400">Loading...</div>
   )
 
   const solved = progress.solvedProblems || []
   const passed = solved.filter(p => p.passed)
-  const failed = solved.filter(p => !p.passed)
   const avgScore = solved.length > 0
     ? Math.round(solved.reduce((a, b) => a + (b.score || 0), 0) / solved.length)
     : 0
 
-  // Topic breakdown
   const topicMap = {}
   solved.forEach(p => {
     if (!topicMap[p.topic]) topicMap[p.topic] = { total: 0, passed: 0 }
@@ -32,13 +36,9 @@ export default function DashboardPage() {
     if (p.passed) topicMap[p.topic].passed += 1
   })
 
-  // Language breakdown
   const langMap = {}
-  solved.forEach(p => {
-    langMap[p.language] = (langMap[p.language] || 0) + 1
-  })
+  solved.forEach(p => { langMap[p.language] = (langMap[p.language] || 0) + 1 })
 
-  // Last 7 days activity
   const last7Days = []
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
@@ -50,25 +50,51 @@ export default function DashboardPage() {
       count: progress.dailyActivity?.[key] || 0
     })
   }
-
   const maxActivity = Math.max(...last7Days.map(d => d.count), 1)
+
+  const levelColor = {
+    'Beginner': 'text-green-400 bg-green-900/30 border-green-700/50',
+    'Intermediate': 'text-yellow-400 bg-yellow-900/30 border-yellow-700/50',
+    'Advanced': 'text-purple-400 bg-purple-900/30 border-purple-700/50',
+  }[profile?.level] || 'text-gray-400 bg-gray-800 border-gray-700'
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Your Dashboard</h1>
-          <p className="text-gray-400 mt-1">Track your coding journey</p>
+
+      {/* Profile Card */}
+      {profile && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8 flex items-center gap-6">
+          <div className="w-16 h-16 rounded-full bg-purple-700 flex items-center justify-center text-2xl font-bold text-white shrink-0">
+            {profile.username ? profile.username[0].toUpperCase() : <User size={28} />}
+          </div>
+          <div className="flex-1">
+            <h2 className="text-xl font-bold text-white">{profile.username || 'Coder'}</h2>
+            <p className="text-gray-400 text-sm">{user?.email}</p>
+            <div className="flex items-center gap-3 mt-2">
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${levelColor}`}>
+                {profile.level || 'Beginner'}
+              </span>
+              {profile.language && (
+                <span className="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full border border-gray-700">
+                  {profile.language}
+                </span>
+              )}
+              {profile.goal && (
+                <span className="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full border border-gray-700">
+                  🎯 {profile.goal}
+                </span>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-all"
+          >
+            <Code2 size={16} />
+            Practice Now
+          </button>
         </div>
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-all"
-        >
-          <Code2 size={16} />
-          Practice Now
-        </button>
-      </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -120,9 +146,7 @@ export default function DashboardPage() {
             <div key={i} className="flex flex-col items-center gap-2 flex-1">
               <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
                 <div
-                  className={`w-full rounded-t-md transition-all ${
-                    day.count > 0 ? 'bg-purple-600' : 'bg-gray-800'
-                  }`}
+                  className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-purple-600' : 'bg-gray-800'}`}
                   style={{ height: `${(day.count / maxActivity) * 80}px`, minHeight: day.count > 0 ? '8px' : '4px' }}
                 />
               </div>
@@ -168,7 +192,7 @@ export default function DashboardPage() {
             <Trophy size={18} className="text-yellow-400" />
             Badges
           </h2>
-          {progress.badges?.length === 0 || !progress.badges ? (
+          {!progress.badges?.length ? (
             <p className="text-gray-500 text-sm">Solve problems to earn badges!</p>
           ) : (
             <div className="flex flex-wrap gap-3">
@@ -196,9 +220,7 @@ export default function DashboardPage() {
             {[...solved].reverse().map((p, i) => (
               <div key={i} className="flex items-center justify-between p-4 bg-gray-800 rounded-xl border border-gray-700">
                 <div className="flex items-center gap-3">
-                  <span className={`text-lg ${p.passed ? '✅' : '❌'}`}>
-                    {p.passed ? '✅' : '❌'}
-                  </span>
+                  <span className="text-lg">{p.passed ? '✅' : '❌'}</span>
                   <div>
                     <p className="text-sm font-medium text-white">{p.title}</p>
                     <p className="text-xs text-gray-400">{p.language} · {p.topic} · {p.difficulty}</p>
@@ -206,9 +228,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-purple-400">{p.score}/100</p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(p.solvedAt).toLocaleDateString()}
-                  </p>
+                  <p className="text-xs text-gray-500">{new Date(p.solvedAt).toLocaleDateString()}</p>
                 </div>
               </div>
             ))}
