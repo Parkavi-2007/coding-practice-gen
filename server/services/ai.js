@@ -74,7 +74,7 @@ Return ONLY a JSON array with exactly 5 objects:
     "description": "clear problem description",
     "examples": "2 input/output examples",
     "constraints": "3 constraints",
-    "starterCode": "// Write your solution here",
+    "starterCode": "class Solution {\\n    public returnType methodName(params) {\\n        // Write your solution here\\n    }\\n}",
     "testCases": [
       {"input": "input1", "expected": "output1", "explanation": "why"},
       {"input": "input2", "expected": "output2", "explanation": "why"},
@@ -85,15 +85,16 @@ Return ONLY a JSON array with exactly 5 objects:
 
 Important rules:
 - Use only double quotes in JSON
-- NO backticks anywhere in the response — not in starterCode, not in any field
+- NO backticks anywhere in the response
 - starterCode must be plain raw code only, no markdown, no triple backticks, no code fences
 - Use \\n for line breaks in starterCode
-- starterCode must be EMPTY with just a comment saying write your solution here
+- starterCode must ONLY contain the class and empty method signature with a comment inside
 - Do NOT put any solution or logic in starterCode
-- starterCode is just a blank template for the user to fill in
-- starterCode must have exactly ONE opening brace and ONE closing brace
+- For Java/C++/C#: wrap in class Solution with correct return type and params
+- For Python: use def methodName(self, params):\\n        pass
+- For JavaScript/TypeScript: use function methodName(params) {\\n    // Write your solution here\\n}
+- For Go/Rust: use the correct function signature for that language
 - No extra text outside the JSON array`
-
   }], 2000)
   return parseJSON(text)
 }
