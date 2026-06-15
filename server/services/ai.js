@@ -74,7 +74,7 @@ Return ONLY a JSON array with exactly 5 objects:
     "description": "clear problem description",
     "examples": "2 input/output examples",
     "constraints": "3 constraints",
-    "starterCode": "public int methodName(int[] arr) {\\n    // Write your solution here\\n}",
+    "starterCode": "// Write your solution here",
     "testCases": [
       {"input": "input1", "expected": "output1", "explanation": "why"},
       {"input": "input2", "expected": "output2", "explanation": "why"},
@@ -88,8 +88,12 @@ Important rules:
 - NO backticks anywhere in the response — not in starterCode, not in any field
 - starterCode must be plain raw code only, no markdown, no triple backticks, no code fences
 - Use \\n for line breaks in starterCode
+- starterCode must be EMPTY with just a comment saying write your solution here
+- Do NOT put any solution or logic in starterCode
+- starterCode is just a blank template for the user to fill in
 - starterCode must have exactly ONE opening brace and ONE closing brace
 - No extra text outside the JSON array`
+
   }], 2000)
   return parseJSON(text)
 }
