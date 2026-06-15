@@ -132,21 +132,34 @@ const [started, setStarted] = useState(false)
       setResult(finalResult)
       setSubmitted(true)
 
+      const progress = getProgress()
+
+      // Record weekend challenge history
+      progress.weekendChallengeHistory = progress.weekendChallengeHistory || []
+      progress.weekendChallengeHistory.push({
+        title: challenge.title,
+        passed: finalResult.passed,
+        score: finalResult.score,
+        solvedAt: new Date().toISOString()
+      })
+
+      // Award badges based on weekend history
       if (finalResult.passed) {
-        const progress = getProgress()
-        const badgeId = 'weekend_warrior'
-        if (!progress.badges.find(b => b.id === badgeId)) {
-          progress.badges.push({
-            id: badgeId,
-            name: challenge.badge?.name || 'Weekend Warrior',
-            emoji: challenge.badge?.emoji || '⚔️',
-            description: challenge.badge?.description || 'Completed the weekend challenge!',
-            earnedAt: new Date().toISOString()
-          })
-          saveProgress(progress)
-          setBadgeEarned(true)
+        const weekendSolved = progress.weekendChallengeHistory.filter(w => w.passed)
+        
+        const checkAndAdd = (id, name, emoji, description) => {
+          if (!progress.badges.find(b => b.id === id)) {
+            progress.badges.push({ id, name, emoji, description, earnedAt: new Date().toISOString() })
+            setBadgeEarned(true)
+          }
         }
+
+        if (weekendSolved.length >= 1) checkAndAdd('weekend_warrior', 'Weekend Warrior', '⚔️', 'Solved your first weekend challenge!')
+        if (weekendSolved.length >= 3) checkAndAdd('weekend_legend', 'Weekend Legend', '🏆', 'Solved 3 weekend challenges!')
+        if (weekendSolved.length >= 5) checkAndAdd('champion', 'Champion', '👑', 'Solved 5 weekend challenges!')
       }
+
+      saveProgress(progress)
     } catch (err) {
       console.error(err)
     }

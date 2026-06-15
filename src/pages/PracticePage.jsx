@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Editor from '@monaco-editor/react'
 import { Lightbulb, Send, ArrowLeft, Loader2, CheckCircle, XCircle, Play } from 'lucide-react'
-import { recordSolvedProblem } from '../utils/storage'
+import { recordSolvedProblem, syncToSupabase, getProgress } from '../utils/storage'
+import { useAuth } from '../context/AuthContext'
 
 export default function PracticePage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [session, setSession] = useState(null)
   const [code, setCode] = useState('')
   const [problem, setProblem] = useState(null)
@@ -130,10 +132,12 @@ const [teachLoading, setTeachLoading] = useState(false)
         })
         setTestResults(data)
         recordSolvedProblem(problem, session, score, allPassed)
+        syncToSupabase(getProgress(), user?.id)
       } else {
         setFeedback(data)
         setTestResults(data.testResults)
         recordSolvedProblem(problem, session, data.score || 0, data.passed || false)
+        syncToSupabase(getProgress(), user?.id)
       }
     } catch (err) {
       console.error('Submit error:', err)
